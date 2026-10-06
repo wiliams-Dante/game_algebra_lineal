@@ -1,25 +1,35 @@
-class Vector:
-    def __init__(self, x : float, y : float):
-        self.x = x
-        self.y = y 
+import math
 
+
+class Vector:
+
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
 
     def __repr__(self) -> str:
-        return f"Vector({self.x}, {self.y})" 
-    
-    def __add__ (self, Vector2: Vector ) -> Vector:
-        p = Vector(self.x + Vector2.x, self.y + Vector2.y)
-        return p 
+        return f"Vector({self.x}, {self.y})"
 
+    def __add__(self, other: "Vector") -> "Vector":
+        return Vector(self.x + other.x, self.y + other.y)
 
+    def __sub__(self, other: "Vector") -> "Vector":
+        return Vector(self.x - other.x, self.y - other.y)
 
-def main():
-    # 1. Probar Espacio Vectorial R² (Tema 1)
-    posicion = Vector(10.0, 5.0)
-    velocidad = Vector(2.0, 0.0)
-    
-    nueva_posicion = posicion + velocidad
-    print(f"Nueva Posición: {nueva_posicion}")  # Muestra: Vector(12.0, 5.0)
+    def __mul__(self, escalar: float) -> "Vector":
+        return Vector(self.x * escalar, self.y * escalar)
 
-if __name__ == "__main__":
-    main()
+    def __rmul__(self, escalar: float) -> "Vector":
+        return self.__mul__(escalar)
+
+    def producto_punto(self, other: "Vector") -> float:
+        return self.x * other.x + self.y * other.y
+
+    def magnitud(self) -> float:
+        return math.sqrt(self.x**2 + self.y**2)
+
+    def normalizar(self) -> "Vector":
+        mag = self.magnitud()
+        if mag == 0:
+            return Vector(0.0, 0.0)
+        return Vector(self.x / mag, self.y / mag)
