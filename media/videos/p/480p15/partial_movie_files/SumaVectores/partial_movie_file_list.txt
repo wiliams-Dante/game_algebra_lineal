@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/2118183852_262141077_223132457.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/366519484_345438090_3230217458.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/366519484_3554031991_3228506224.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/366519484_847192958_3442293606.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/366519484_568589616_2904926863.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/366519484_847192958_2146454418.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/366519484_1986451814_730368499.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/p/480p15/partial_movie_files/SumaVectores/366519484_2645707024_1182767866.mp4'
