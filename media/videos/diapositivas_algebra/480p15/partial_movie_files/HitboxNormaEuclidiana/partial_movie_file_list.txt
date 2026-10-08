@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/HitboxNormaEuclidiana/2118183852_2266638315_223132457.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/HitboxNormaEuclidiana/366519484_3566429974_1971803710.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/HitboxNormaEuclidiana/366519484_3437041654_3852587639.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/HitboxNormaEuclidiana/366519484_333081206_1821645965.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/HitboxNormaEuclidiana/366519484_2645707024_1516425545.mp4'

@@ -1,5 +1,7 @@
 import math
 
+# Dos números con diferencia < EPSILON se consideran "iguales"
+EPSILON = 1e-9
 
 class Vector:
 
@@ -39,6 +41,7 @@ class Vector:
     def normalizar(self) -> "Vector":
         # u = v / ||v|| (vector unitario, ||u|| = 1)
         mag = self.magnitud()
-        if mag == 0:
+        # Si la magnitud es ~0, el vector es (casi) nulo: no se puede normalizar.
+        if mag < EPSILON:
             return Vector(0.0, 0.0)
         return Vector(self.x / mag, self.y / mag)

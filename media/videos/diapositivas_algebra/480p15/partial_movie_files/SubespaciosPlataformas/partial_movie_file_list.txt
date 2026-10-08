@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/SubespaciosPlataformas/2118183852_923275934_223132457.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/SubespaciosPlataformas/366519484_2565155092_3669551316.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/SubespaciosPlataformas/366519484_957546900_3519013806.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/SubespaciosPlataformas/366519484_1448459818_253098464.mp4'
+file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/SubespaciosPlataformas/366519484_2645707024_2044551088.mp4'
