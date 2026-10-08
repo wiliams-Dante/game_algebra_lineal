@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 24px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            width: 420px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .panel-title {
+            color: #f1e05a;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 5px;
+        }
+        .concept-item {
+            margin-bottom: 12px;
+        }
+        .label-green { color: #7ee787; font-weight: bold; font-size: 14px; }
+        .label-blue { color: #79c0ff; font-weight: bold; font-size: 14px; }
+        .label-orange { color: #ffa657; font-weight: bold; font-size: 14px; }
+        .label-pink { color: #d2a8ff; font-weight: bold; font-size: 14px; }
+        .desc { font-size: 13px; color: #c9d1d9; margin-left: 12px; margin-top: 2px; }
+        
+        pre {
+            background-color: #161b22;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #c9d1d9;
+        }
+        .kw { color: #ff7b72; }
+        .fn { color: #d2a8ff; }
+        .str { color: #a5d6ff; }
+        .cm { color: #8b949e; }
+    </style>
+</head>
+<body>
+
+    <h1>Programación Orientada a Objetos (POO) en el Videojuego</h1>
+
+    <div class="container">
+        <!-- Panel Izquierdo: Teoría -->
+        <div class="panel">
+            <div class="panel-title">Conceptos Fundamentales</div>
+            
+            <div class="concept-item">
+                <div class="label-green">• Clase:</div>
+                <div class="desc">Plantilla o molde genérico para crear objetos.</div>
+            </div>
+
+            <div class="concept-item">
+                <div class="label-blue">• Atributos:</div>
+                <div class="desc">Variables internas que definen el estado o propiedades.</div>
+            </div>
+
+            <div class="concept-item">
+                <div class="label-orange">• Métodos:</div>
+                <div class="desc">Funciones internas que definen el comportamiento o acciones.</div>
+            </div>
+
+            <div class="concept-item">
+                <div class="label-pink">• Instancia (Objeto):</div>
+                <div class="desc">Ejemplar concreto y real creado en memoria a partir de la clase.</div>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Código -->
+        <div class="panel">
+            <div class="panel-title">Ejemplo Práctico en Python</div>
+            <pre>
+<span class="kw">class</span> <span class="label-green">Jugador</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, x, y):
+        self.pos = [x, y]  <span class="cm">← Atributo</span>
+        self.vida = 100    <span class="cm">← Atributo</span>
+
+    <span class="kw">def</span> <span class="fn">mover</span>(self, dx):   <span class="cm">← Método</span>
+        self.pos[0] += dx
+
+<span class="cm"># Instanciación en memoria</span>
+j1 = <span class="label-green">Jugador</span>(2, 6)         <span class="cm">← Instancia</span>
+            </pre>
+        </div>
+    </div>
+
+</body>
+</html>
