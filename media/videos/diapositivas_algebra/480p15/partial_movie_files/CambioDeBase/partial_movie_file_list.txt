@@ -1,8 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/CambioDeBase/2118183852_3984501194_223132457.mp4'
-file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/CambioDeBase/366519484_544425926_2064728105.mp4'
-file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/CambioDeBase/366519484_1369830234_1638449152.mp4'
-file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/CambioDeBase/366519484_3592473557_186832430.mp4'
-file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/CambioDeBase/366519484_847192958_2404421414.mp4'
-file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/CambioDeBase/366519484_1728509862_3730718938.mp4'
-file 'file:/home/dante/game_algebra_lineal/media/videos/diapositivas_algebra/480p15/partial_movie_files/CambioDeBase/366519484_2645707024_4109184117.mp4'
