@@ -1,7 +1,6 @@
-# ============================================================
+
 # VARIABLES DEL PROYECTO
 # Aquí se definen las constantes: tamaños, colores y modos.
-# ============================================================
 
 # --- Ventana ---
 WIDTH, HEIGHT = 1050, 600
