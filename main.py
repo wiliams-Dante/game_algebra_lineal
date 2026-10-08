@@ -35,16 +35,18 @@ INFO_MODO = {
                        lambda: Base2D(Vector(1, 0), Vector(0, -1))),
 }
 
+S = v.ESCALA
+
 
 def texto(pantalla, txt, fuente, color, x, y, salto=22):
     pantalla.blit(fuente.render(txt, True, color), (x, y))
-    return y + salto
+    return y + salto * S
 
 
 def sep(pantalla, x, y):
     pygame.draw.line(pantalla, v.COLOR_SEPARADOR,
-                     (x, y), (v.WIDTH - 15, y), 1)
-    return y + 10
+                     (x, y), (v.WIDTH - int(15 * S), y), 1)
+    return y + int(10 * S)
 
 
 def dibujar(pantalla, pos, base, modo, fuentes):
@@ -52,8 +54,9 @@ def dibujar(pantalla, pos, base, modo, fuentes):
     pantalla.fill(v.COLOR_FONDO)
 
     for vector, color in [(base.v1, v.COLOR_EJE_V1), (base.v2, v.COLOR_EJE_V2)]:
-        fin = pos + vector * 80
-        pygame.draw.line(pantalla, color, (pos.x, pos.y), (fin.x, fin.y), 3)
+        fin = pos + vector * int(80 * S)
+        pygame.draw.line(pantalla, color, (pos.x, pos.y), (fin.x, fin.y),
+                         max(1, int(3 * S)))
 
     m = v.TAMANO_JUGADOR / 2
     poligono = [(pos + base.reconstruir_desde_base(cx, cy))
@@ -62,14 +65,15 @@ def dibujar(pantalla, pos, base, modo, fuentes):
 
     pygame.draw.polygon(pantalla, v.COLOR_CUADRO[modo], poligono)
     pygame.draw.polygon(pantalla, v.COLOR_TEXTO, poligono, 1)
-    pygame.draw.circle(pantalla, v.COLOR_TEXTO, (int(pos.x), int(pos.y)), 3)
+    pygame.draw.circle(pantalla, v.COLOR_TEXTO,
+                       (int(pos.x), int(pos.y)), max(2, int(3 * S)))
 
     pygame.draw.rect(pantalla, v.COLOR_PANEL,
                      (v.PANEL_X, 0, v.WIDTH - v.PANEL_X, v.HEIGHT))
     pygame.draw.line(pantalla, v.COLOR_SEPARADOR,
                      (v.PANEL_X, 0), (v.PANEL_X, v.HEIGHT), 2)
 
-    x, y = v.PANEL_X + 15, 15
+    x, y = v.PANEL_X + int(15 * S), int(15 * S)
     y = texto(pantalla, INFO_MODO[modo][0], f, v.COLOR_MODO, x, y, 30)
     y = sep(pantalla, x, y)
 
@@ -85,7 +89,7 @@ def dibujar(pantalla, pos, base, modo, fuentes):
         y = texto(pantalla, "P (base B) = no definido (LD)", fp,
                   v.COLOR_ERROR, x, y)
 
-    y = sep(pantalla, x, y + 8)
+    y = sep(pantalla, x, y + int(8 * S))
 
     for d in [f"v1 = ({base.v1.x:.2f}, {base.v1.y:.2f})",
               f"v2 = ({base.v2.x:.2f}, {base.v2.y:.2f})",
@@ -93,7 +97,7 @@ def dibujar(pantalla, pos, base, modo, fuentes):
               f"det(B)  = {base.determinante():.2f}"]:
         y = texto(pantalla, d, fp, v.COLOR_TEXTO, x, y)
 
-    y += 8
+    y += int(8 * S)
     for etiqueta, valor in [("Ortogonal:",  base.es_conjunto_ortogonal()),
                             ("Es base:  ",  base.es_valida),
                             ("Ortonormal:", base.es_base_ortonormal())]:
@@ -101,7 +105,7 @@ def dibujar(pantalla, pos, base, modo, fuentes):
         y = texto(pantalla, f"{etiqueta} {'SI' if valor else 'NO'}", fp,
                   color, x, y)
 
-    y = sep(pantalla, x, y + 15)
+    y = sep(pantalla, x, y + int(15 * S))
     y = texto(pantalla, "Explicacion:", ft, v.COLOR_TEXTO_DIM, x, y, 25)
     for linea in INFO_MODO[modo][1]:
         y = texto(pantalla, linea, fp, v.COLOR_TEXTO_DIM, x, y, 20)
@@ -112,9 +116,9 @@ def main():
     pantalla = pygame.display.set_mode((v.WIDTH, v.HEIGHT))
     pygame.display.set_caption("Grupo I - Demo")
     reloj = pygame.time.Clock()
-    fuentes = (pygame.font.SysFont("Arial", 18),
-               pygame.font.SysFont("Arial", 14),
-               pygame.font.SysFont("Arial", 16, bold=True))
+    fuentes = (pygame.font.SysFont("Arial", int(18 * S)),
+               pygame.font.SysFont("Arial", int(14 * S)),
+               pygame.font.SysFont("Arial", int(16 * S), bold=True))
 
     CONTROLES = [
         ((pygame.K_LEFT,  pygame.K_a), (-1, 0)),

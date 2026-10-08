@@ -1,38 +1,34 @@
-# VARIABLES DEL PROYECTO
+# ESCALA GLOBAL
+ESCALA = 1.25
 
 #  Ventana 
-WIDTH, HEIGHT = 1050, 600
-PANEL_X = 800 # Posición horizontal donde empieza la interfaz 
-FPS = 60 # Fluidez del juego
-
+WIDTH = int(1050 * ESCALA)
+HEIGHT = int(600 * ESCALA)
+PANEL_X = int(800 * ESCALA)
+FPS = 60
 
 #  Jugador 
-VELOCIDAD_MOV = 300 # Velo de mov. en píxeles por segundo 
-TAMANO_JUGADOR = 50 # 50x50 píxeles
-
+VELOCIDAD_MOV = int(300 * ESCALA)
+TAMANO_JUGADOR = int(50 * ESCALA)
 
 #  Modos de la demo 
-MODO_ROTADA = 1     # Base ortonormal rotada
-MODO_NO_ORT = 2     # Base no ortogonal
-MODO_LD = 3         # Base linealmente dependiente 
-MODO_INVERTIDA = 4  # Base con orientación negativa
-
+MODO_ROTADA = 1
+MODO_NO_ORT = 2
+MODO_LD = 3
+MODO_INVERTIDA = 4
 
 #  Colores del área del juego 
-COLOR_FONDO = (20, 20, 30) # Fondo oscuro 
-COLOR_EJE_V1 = (255, 100, 100) # Vector rojo eje x
-COLOR_EJE_V2 = (100, 255, 100) # Vector verde eje Y 
-
-
+COLOR_FONDO = (20, 20, 30)
+COLOR_EJE_V1 = (255, 100, 100)
+COLOR_EJE_V2 = (100, 255, 100)
 
 #  Colores del cuadrado según el modo 
 COLOR_CUADRO = {
-    MODO_ROTADA:    (0, 200, 255),   # azul
-    MODO_NO_ORT:    (255, 180, 0),   # naranja
-    MODO_LD:        (255, 60, 60),   # rojo
-    MODO_INVERTIDA: (180, 100, 255), # morado
+    MODO_ROTADA:    (0, 200, 255),
+    MODO_NO_ORT:    (255, 180, 0),
+    MODO_LD:        (255, 60, 60),
+    MODO_INVERTIDA: (180, 100, 255),
 }
-
 
 #  Colores del panel lateral 
 COLOR_PANEL = (30, 30, 45)
