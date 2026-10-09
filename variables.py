@@ -30,7 +30,7 @@ COLOR_CUADRO = {
     MODO_NO_ORT:    (255, 180, 0),
     MODO_LD:        (255, 60, 60),
     MODO_INVERTIDA: (180, 100, 255),
-    MODO_PERSONAJE: (100, 255, 200)   # ← necesario
+    MODO_PERSONAJE: (100, 255, 200)  
 }
 
 #  Colores del panel lateral 
