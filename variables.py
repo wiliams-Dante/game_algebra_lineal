@@ -1,7 +1,6 @@
 # ESCALA GLOBAL
 ESCALA = 1.25
-RUTA_SPRITE = "assets/images/personaje.png"   # ajusta el nombre de tu imagen
-
+RUTA_SPRITE = "assets/images/personaje.png"  
 #  Ventana 
 WIDTH = int(1050 * ESCALA)
 HEIGHT = int(600 * ESCALA)
