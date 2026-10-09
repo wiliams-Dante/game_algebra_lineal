@@ -1,5 +1,6 @@
 # ESCALA GLOBAL
 ESCALA = 1.25
+RUTA_SPRITE = "assets/images/personaje.png"   # ajusta el nombre de tu imagen
 
 #  Ventana 
 WIDTH = int(1050 * ESCALA)
@@ -16,6 +17,8 @@ MODO_ROTADA = 1
 MODO_NO_ORT = 2
 MODO_LD = 3
 MODO_INVERTIDA = 4
+MODO_PERSONAJE = 5
+
 
 #  Colores del área del juego 
 COLOR_FONDO = (20, 20, 30)
@@ -28,6 +31,7 @@ COLOR_CUADRO = {
     MODO_NO_ORT:    (255, 180, 0),
     MODO_LD:        (255, 60, 60),
     MODO_INVERTIDA: (180, 100, 255),
+    MODO_PERSONAJE: (100, 255, 200)   # ← necesario
 }
 
 #  Colores del panel lateral 

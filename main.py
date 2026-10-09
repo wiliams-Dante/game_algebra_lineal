@@ -1,6 +1,7 @@
 import pygame
 import sys
 import os
+import math
 from src.algebra.vector import Vector
 from src.algebra.base import Base2D
 import variables as v
@@ -33,6 +34,13 @@ INFO_MODO = {
                         "Orientacion NEGATIVA (det < 0).",
                         "El cuadrado se espeja."],
                        lambda: Base2D(Vector(1, 0), Vector(0, -1))),
+    v.MODO_PERSONAJE: ("5. Aplicacion: personaje en movimiento",
+                       ["Asi funciona la base de un",
+                        "motor de videojuego: el",
+                        "personaje se mueve dentro",
+                        "del espacio vectorial",
+                        "definido por la base."],
+                       lambda: Base2D(Vector(1, 0), Vector(0, 1))),
 }
 
 S = v.ESCALA
@@ -49,7 +57,14 @@ def sep(pantalla, x, y):
     return y + int(10 * S)
 
 
-def dibujar(pantalla, pos, base, modo, fuentes):
+def rotar_vector(vec, angulo):
+    cos_a = math.cos(angulo)
+    sin_a = math.sin(angulo)
+    return Vector(vec.x * cos_a - vec.y * sin_a,
+                  vec.x * sin_a + vec.y * cos_a)
+
+
+def dibujar(pantalla, pos, base, modo, fuentes, sprite):
     f, fp, ft = fuentes
     pantalla.fill(v.COLOR_FONDO)
 
@@ -58,15 +73,18 @@ def dibujar(pantalla, pos, base, modo, fuentes):
         pygame.draw.line(pantalla, color, (pos.x, pos.y), (fin.x, fin.y),
                          max(1, int(3 * S)))
 
-    m = v.TAMANO_JUGADOR / 2
-    poligono = [(pos + base.reconstruir_desde_base(cx, cy))
-                for cx, cy in [(-m, -m), (m, -m), (m, m), (-m, m)]]
-    poligono = [(p.x, p.y) for p in poligono]
-
-    pygame.draw.polygon(pantalla, v.COLOR_CUADRO[modo], poligono)
-    pygame.draw.polygon(pantalla, v.COLOR_TEXTO, poligono, 1)
-    pygame.draw.circle(pantalla, v.COLOR_TEXTO,
-                       (int(pos.x), int(pos.y)), max(2, int(3 * S)))
+    if modo == v.MODO_PERSONAJE:
+        rect = sprite.get_rect(center=(int(pos.x), int(pos.y)))
+        pantalla.blit(sprite, rect)
+    else:
+        m = v.TAMANO_JUGADOR / 2
+        poligono = [(pos + base.reconstruir_desde_base(cx, cy))
+                    for cx, cy in [(-m, -m), (m, -m), (m, m), (-m, m)]]
+        poligono = [(p.x, p.y) for p in poligono]
+        pygame.draw.polygon(pantalla, v.COLOR_CUADRO[modo], poligono)
+        pygame.draw.polygon(pantalla, v.COLOR_TEXTO, poligono, 1)
+        pygame.draw.circle(pantalla, v.COLOR_TEXTO,
+                           (int(pos.x), int(pos.y)), max(2, int(3 * S)))
 
     pygame.draw.rect(pantalla, v.COLOR_PANEL,
                      (v.PANEL_X, 0, v.WIDTH - v.PANEL_X, v.HEIGHT))
@@ -120,6 +138,9 @@ def main():
                pygame.font.SysFont("Arial", int(14 * S)),
                pygame.font.SysFont("Arial", int(16 * S), bold=True))
 
+    sprite = pygame.image.load(v.RUTA_SPRITE).convert_alpha()
+    sprite = pygame.transform.scale(sprite, (int(60 * S), int(60 * S)))
+
     CONTROLES = [
         ((pygame.K_LEFT,  pygame.K_a), (-1, 0)),
         ((pygame.K_RIGHT, pygame.K_d), ( 1, 0)),
@@ -127,11 +148,13 @@ def main():
         ((pygame.K_DOWN,  pygame.K_s), ( 0, 1)),
     ]
     TECLAS_MODO = {pygame.K_1: v.MODO_ROTADA, pygame.K_2: v.MODO_NO_ORT,
-                   pygame.K_3: v.MODO_LD,     pygame.K_4: v.MODO_INVERTIDA}
+                   pygame.K_3: v.MODO_LD,     pygame.K_4: v.MODO_INVERTIDA,
+                   pygame.K_5: v.MODO_PERSONAJE}
 
     posicion = Vector(v.PANEL_X / 2, v.HEIGHT / 2)
     modo_actual, modo_anterior = v.MODO_ROTADA, None
-    base_actual = Base2D(Vector(1, 0), Vector(0, 1))
+    base_original = INFO_MODO[modo_actual][2]()
+    angulo_actual = 0.0
 
     while True:
         dt = reloj.tick(v.FPS) / 1000.0
@@ -140,7 +163,8 @@ def main():
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             if e.type == pygame.KEYDOWN:
-                if e.key in TECLAS_MODO: modo_actual = TECLAS_MODO[e.key]
+                if e.key in TECLAS_MODO:
+                    modo_actual = TECLAS_MODO[e.key]
                 elif e.key == pygame.K_ESCAPE:
                     pygame.quit(); sys.exit()
 
@@ -153,14 +177,22 @@ def main():
         posicion = posicion + velocidad * dt
 
         if modo_actual != modo_anterior:
-            base_actual = INFO_MODO[modo_actual][2]()
+            base_original = INFO_MODO[modo_actual][2]()
+            angulo_actual = 0.0
             modo_anterior = modo_actual
 
-        if modo_actual == v.MODO_ROTADA and velocidad.magnitud() > 0:
-            v1 = velocidad.normalizar()
-            base_actual = Base2D(v1, Vector(-v1.y, v1.x))
+        if velocidad.magnitud() > 0:
+            angulo_objetivo = math.atan2(velocidad.y, velocidad.x)
+            diff = angulo_objetivo - angulo_actual
+            while diff > math.pi:  diff -= 2 * math.pi
+            while diff < -math.pi: diff += 2 * math.pi
+            angulo_actual += diff * min(1.0, 10 * dt)
 
-        dibujar(pantalla, posicion, base_actual, modo_actual, fuentes)
+        v1_rot = rotar_vector(base_original.v1, angulo_actual)
+        v2_rot = rotar_vector(base_original.v2, angulo_actual)
+        base_actual = Base2D(v1_rot, v2_rot)
+
+        dibujar(pantalla, posicion, base_actual, modo_actual, fuentes, sprite)
         pygame.display.flip()
 
 
