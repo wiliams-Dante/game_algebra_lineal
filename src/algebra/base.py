@@ -41,6 +41,7 @@ class Base2D:
                 abs(self.v2.magnitud() - 1.0) < EPSILON)
 
     def orientacion(self) -> str:
+        # Signo del det(B)
         det = self.determinante()
         if abs(det) < EPSILON:
             return "LD, no es base"
@@ -50,23 +51,46 @@ class Base2D:
             return "Negativa (det < 0)"
 
     def cambiar_de_base(self, v: Vector) -> Vector:
-        # Regla de Cramer: [v]_B = (c1, c2)
+        #Multiplica la Matriz Inversa de la Base por el Vector v.
         det_B = self.determinante()
 
         if abs(det_B) < EPSILON:
-            print("No se puede cambiar de base, es L.D.")
+            print("No se puede cambiar de base, los vectores son L.D.")
             return Vector(0.0, 0.0)
+        #Matriz de vectores de la base
+        a, b = self.v1.x, self.v2.x
+        c, d = self.v1.y, self.v2.y
 
-        # c1 = det(v, v2) / det(v1, v2)
-        c1 = (v.x * self.v2.y - v.y * self.v2.x) / det_B
-        # c2 = det(v1, v) / det(v1, v2)
-        c2 = (self.v1.x * v.y - self.v1.y * v.x) / det_B
+        # 3. Matriz Inversa 
+        inv_a =  d / det_B
+        inv_b = -b / det_B
+        inv_c = -c / det_B
+        inv_d =  a / det_B
+
+        # Multiplicación Matriz x Vector:
+ 
+        c1 = inv_a * v.x + inv_b * v.y
+        c2 = inv_c * v.x + inv_d * v.y
 
         return Vector(c1, c2)
 
     def reconstruir_desde_base(self, c1: float, c2: float) -> Vector:
         # v = c1*v1 + c2*v2
         return self.v1 * c1 + self.v2 * c2
+
+    def proyectar(self, v: Vector) -> Vector:
+        # proj(v) = c1*v1 + c2*v2, con [v]_B = (c1, c2)
+        # Es el vector del plano (o recta) generado por v1 y v2 más cercano a v.
+        if not self.es_valida:
+            return Vector(0.0, 0.0)
+        c = self.cambiar_de_base(v)
+        return self.reconstruir_desde_base(c.x, c.y)
+
+    def componente_ortogonal(self, v: Vector) -> Vector:
+        # v_perp = v - proj(v)
+        # Parte de v que queda fuera del plano (o recta) generado por v1 y v2.
+        # Cumple v = proj(v) + v_perp.
+        return v - self.proyectar(v)
 
     def __repr__(self) -> str:
         return f"Base2D(v1={self.v1}, v2={self.v2})"

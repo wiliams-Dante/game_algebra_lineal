@@ -45,3 +45,5 @@ class Vector:
         if mag < EPSILON:
             return Vector(0.0, 0.0)
         return Vector(self.x / mag, self.y / mag)
+
+    
