@@ -1,13 +1,15 @@
+# src/entidades/plataforma.py
 from src.algebra.vector import Vector, EPSILON
-
 
 class Plataforma:
     # Recta acotada: { origen + t*direccion : 0 <= t <= longitud }.
-    # Si origen == (0,0), es subespacio vectorial.
-    # Si origen != (0,0), es subespacio afín (trasladado).
+    #
+    # Nota matematica:
+    #   - TODO subespacio vectorial es tambien un subespacio afin.
+    #   - Si pasa por el origen (origen == (0,0)): es un subespacio vectorial.
+    #   - Si NO pasa por el origen: es un subespacio afin propio (trasladado).
 
-    def __init__(self, origen: Vector, direccion: Vector, longitud: float,
-                 grosor: float ):
+    def __init__(self, origen: Vector, direccion: Vector, longitud: float, grosor: float):
         self.origen = origen
         self.direccion = direccion.normalizar()
         self.longitud = longitud
@@ -19,54 +21,44 @@ class Plataforma:
 
     def parametro(self, punto: Vector) -> float:
         # t = <punto - origen, direccion>
-        # Coordenada escalar del punto a lo largo de la recta.
         return (punto - self.origen).producto_punto(self.direccion)
 
     def proyectar(self, punto: Vector) -> Vector:
-        # Proyección ortogonal sobre la recta infinita.
+        # Proyeccion ortogonal sobre la recta infinita.
         t = self.parametro(punto)
         return self.origen + self.direccion * t
 
     def punto_mas_cercano(self, punto: Vector) -> Vector:
-        # Punto del segmento más cercano (t acotado a [0, longitud]).
+        # Punto del segmento mas cercano (t acotado a [0, longitud]).
         t = self.parametro(punto)
         t = max(0.0, min(self.longitud, t))
         return self.origen + self.direccion * t
-
-    def distancia(self, punto: Vector) -> float:
-        # Distancia perpendicular a la recta infinita.
-        return (punto - self.proyectar(punto)).magnitud()
 
     def distancia_al_segmento(self, punto: Vector) -> float:
         # Distancia al segmento (no a la recta infinita).
         return (punto - self.punto_mas_cercano(punto)).magnitud()
 
     def colisiona(self, punto: Vector, radio: float) -> bool:
-        # Colisión círculo-segmento.
+        # Colision circulo-segmento.
         return self.distancia_al_segmento(punto) <= radio
 
     def normal(self) -> Vector:
         # Vector perpendicular a la direccion.
         return Vector(self.direccion.y, -self.direccion.x)
 
+    # ---------- Clasificacion algebraica ----------
 
-    def es_subespacio_vectorial(self) -> bool:
-        # Lo es si pasa por el origen.
+    def pasa_por_origen(self) -> bool:
+        # La recta contiene al (0,0) si su origen es (0,0).
         return self.origen.magnitud() < EPSILON
 
-    def es_subespacio_afin(self) -> bool:
-        # Es afín si NO pasa por el origen.
-        return not self.es_subespacio_vectorial()
+    def es_subespacio_vectorial(self) -> bool:
+        # Pasa por el origen  =>  subespacio vectorial.
+        return self.pasa_por_origen()
 
-    def contiene_al_cero(self) -> bool:
-        # El (0,0) está en la recta si el origen lo está.
-        return self.es_subespacio_vectorial()
-
-    def tipo(self) -> str:
-        # Etiqueta para mostrar en el panel.
-        if self.es_subespacio_vectorial():
-            return "Subespacio vectorial"
-        return "Subespacio afin"
+    def es_subespacio_afin_propio(self) -> bool:
+        # Subespacio afin que NO es vectorial: esta trasladado.
+        return not self.pasa_por_origen()
 
     def __repr__(self) -> str:
         return (f"Plataforma(origen={self.origen}, "

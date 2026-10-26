@@ -1,18 +1,7 @@
-from src.algebra.vector import Vector
-
+# src/entidades/jugador.py
+from src.algebra.vector import Vector, EPSILON
 
 class Jugador:
-    # El estado se guarda como TEXTO en `self.estado`.
-    # El renderizador lo lee para saber que animacion mostrar.
-    #
-    # Los nombres de los estados se definen AQUI como constantes
-    # de clase. main.py puede importarlos para construir el
-    # diccionario de animaciones.
-    #
-    # El hitbox es un circulo de radio `radio`, centrado SIEMPRE
-    # en `posicion`. No hay offset.
-
-    # --- Nombres de estados (fuente de verdad) ---
     ESTADO_QUIETO           = "quieto"
     ESTADO_MOVIMIENTO       = "movimiento"
     ESTADO_ASCIENDE         = "asciende"
@@ -22,37 +11,21 @@ class Jugador:
     ESTADO_RECIBE_DANO      = "recibe_dano"
     ESTADO_MUERE            = "muere"
 
-    # Estados que bloquean el movimiento mientras se reproducen.
-    ESTADOS_BLOQUEANTES = (
-        ESTADO_ATAQUE_NORMAL,
-        ESTADO_ATAQUE_DISTANCIA,
-        ESTADO_RECIBE_DANO,
-    )
+    ESTADOS_BLOQUEANTES = (ESTADO_ATAQUE_NORMAL, ESTADO_ATAQUE_DISTANCIA)
+    DURACION_HITSTUN = 0.35
 
-    def __init__(self, posicion: Vector, radio: float,
-                 velocidad_h: float,
-                 gravedad: float,
-                 salto: float,
-                 vida_max: float,
-                 ataque: float,
-                 cooldown_golpe: float,
-                 cooldown_disparo: float):
-        # --- Fisica ---
+    def __init__(self, posicion: Vector, radio: float, velocidad_h: float,
+                 gravedad: float, salto: float, vida_max: float,
+                 ataque: float, cooldown_golpe: float, cooldown_disparo: float):
         self.posicion = posicion
         self.velocidad = Vector(0, 0)
         self.radio = radio
         self.apoyado = False
-        self.direccion_mirada = 1        # 1 derecha, -1 izquierda
-
-        # --- Parametros de fisica ---
+        self.direccion_mirada = 1
         self.velocidad_h = velocidad_h
         self.gravedad = gravedad
         self.salto = salto
-
-        # --- Estado (texto, lo lee el renderizador) ---
         self.estado = Jugador.ESTADO_QUIETO
-
-        # --- Combate ---
         self.vida_max = vida_max
         self.vida = vida_max
         self.ataque = ataque
@@ -60,14 +33,10 @@ class Jugador:
         self.tiempo_golpe = 0.0
         self.cooldown_disparo = cooldown_disparo
         self.tiempo_disparo = 0.0
-
-        # Bandera: si ya salio el proyectil durante la animacion.
+        self.tiempo_hitstun = 0.0
         self.proyectil_disparado = False
 
-    # ---------- Ciclo de vida ----------
-
     def reiniciar(self, posicion: Vector):
-        # Vuelve al estado inicial.
         self.posicion = posicion
         self.velocidad = Vector(0, 0)
         self.apoyado = False
@@ -76,170 +45,150 @@ class Jugador:
         self.vida = self.vida_max
         self.tiempo_golpe = 0.0
         self.tiempo_disparo = 0.0
+        self.tiempo_hitstun = 0.0
         self.proyectil_disparado = False
 
     def actualizar(self, dt, input_jugador, plataformas):
-        # Un frame completo de fisica + estado.
-        # input_jugador: {"izq": bool, "der": bool,
-        #                 "salto": bool, "disparo": bool}
-
-        # --- Cooldowns ---
         self.tiempo_golpe = max(0.0, self.tiempo_golpe - dt)
         self.tiempo_disparo = max(0.0, self.tiempo_disparo - dt)
+        self.tiempo_hitstun = max(0.0, self.tiempo_hitstun - dt)
 
-        # --- Si esta muerto, solo reproduce "muere" ---
         if not self.esta_vivo():
             self.estado = Jugador.ESTADO_MUERE
             return
 
-        # --- Si esta en animacion de ataque, no se mueve ---
-        if self.estado in Jugador.ESTADOS_BLOQUEANTES:
+        if self.tiempo_hitstun > 0:
+            self.velocidad.x = 0
+            self.velocidad.y += self.gravedad * dt
+            self.posicion = self.posicion + self.velocidad * dt
+            self._resolver_colisiones(plataformas)
+            self.estado = Jugador.ESTADO_RECIBE_DANO
             return
 
-        # --- Input horizontal ---
+        if self.estado == Jugador.ESTADO_RECIBE_DANO:
+            self.estado = Jugador.ESTADO_QUIETO
+
+        if self.estado in Jugador.ESTADOS_BLOQUEANTES:
+            self.velocidad.y += self.gravedad * dt
+            self.posicion = self.posicion + self.velocidad * dt
+            self._resolver_colisiones(plataformas)
+            if self.apoyado:
+                self.velocidad.x = 0
+            return
+        
         vx = 0.0
-        if input_jugador.get("izq", False):
-            vx -= 1
-        if input_jugador.get("der", False):
-            vx += 1
+        if input_jugador.get("izq", False): vx -= 1
+        if input_jugador.get("der", False): vx += 1
 
         self.velocidad.x = vx * self.velocidad_h
-        if vx > 0:
-            self.direccion_mirada = 1
-        elif vx < 0:
-            self.direccion_mirada = -1
+        if vx > 0: self.direccion_mirada = 1
+        elif vx < 0: self.direccion_mirada = -1
 
-        # --- Gravedad ---
         self.velocidad.y += self.gravedad * dt
 
-        # --- Salto ---
         if self.apoyado and input_jugador.get("salto", False):
             self.velocidad.y = -self.salto
             self.apoyado = False
 
-        # --- Integrar posicion ---
         self.posicion = self.posicion + self.velocidad * dt
-
-        # --- Colisiones con plataformas ---
         self._resolver_colisiones(plataformas)
-
-        # --- Actualizar estado ---
         self._actualizar_estado()
 
     def _resolver_colisiones(self, plataformas):
-        # Resuelve colisiones usando la POSICION (el hitbox esta
-        # centrado en ella).
         self.apoyado = False
         for plat in plataformas:
-            if not plat.colisiona(self.posicion, self.radio):
-                continue
+            if not plat.colisiona(self.posicion, self.radio): continue
             proy = plat.punto_mas_cercano(self.posicion)
             diff = self.posicion - proy
-            if diff.magnitud() < 1e-6:
+            dist = diff.magnitud()
+
+            if dist < 1e-6:
                 d = plat.normal()
+                if self.velocidad.producto_punto(d) > 0: d = d * (-1.0)
+                penetracion = self.radio
             else:
                 d = diff.normalizar()
-            # Sacar al jugador fuera de la plataforma.
-            self.posicion = self.posicion + d * (self.radio - diff.magnitud())
-            # Anular componente de velocidad que entra en la plataforma.
+                penetracion = self.radio - dist
+
+            self.posicion = self.posicion + d * penetracion
             vn = self.velocidad.producto_punto(d)
-            if vn < 0:
-                self.velocidad = self.velocidad - d * vn
-            if d.y < -0.5:
-                self.apoyado = True
+            if vn < 0: self.velocidad = self.velocidad - d * vn
+            if d.y < -0.5: self.apoyado = True
 
     def _actualizar_estado(self):
-        # Elige el estado segun lo que esta pasando.
-        if not self.esta_vivo():
-            self.estado = Jugador.ESTADO_MUERE
+        if not self.esta_vivo(): self.estado = Jugador.ESTADO_MUERE
         elif not self.apoyado:
-            if self.velocidad.y < 0:
-                self.estado = Jugador.ESTADO_ASCIENDE
-            else:
-                self.estado = Jugador.ESTADO_DESCIENDE
-        elif abs(self.velocidad.x) > 1:
-            self.estado = Jugador.ESTADO_MOVIMIENTO
-        else:
-            self.estado = Jugador.ESTADO_QUIETO
-
-    # ---------- Animaciones ----------
+            self.estado = Jugador.ESTADO_ASCIENDE if self.velocidad.y < 0 else Jugador.ESTADO_DESCIENDE
+        elif abs(self.velocidad.x) > EPSILON: self.estado = Jugador.ESTADO_MOVIMIENTO
+        else: self.estado = Jugador.ESTADO_QUIETO
 
     def terminar_animacion(self):
-        # Vuelve a "quieto" si estaba en una animacion bloqueante
-        # que ya termino. Lo llama main.py cuando el renderizador
-        # dice que la animacion acabo.
+        if self.tiempo_hitstun > 0: return
         if self.estado in Jugador.ESTADOS_BLOQUEANTES:
-            if self.esta_vivo():
-                self.estado = Jugador.ESTADO_QUIETO
-            else:
-                self.estado = Jugador.ESTADO_MUERE
-
-    # ---------- Combate ----------
+            if self.esta_vivo(): self.estado = Jugador.ESTADO_QUIETO
+            else: self.estado = Jugador.ESTADO_MUERE
 
     def esta_vivo(self) -> bool:
         return self.vida > 0
 
     def recibir_dano(self, cantidad: float):
-        if not self.esta_vivo():
-            return
+        if not self.esta_vivo(): return
         self.vida = max(0.0, self.vida - cantidad)
         if self.vida > 0:
             self.estado = Jugador.ESTADO_RECIBE_DANO
+            self.tiempo_hitstun = Jugador.DURACION_HITSTUN
         else:
             self.estado = Jugador.ESTADO_MUERE
+            self.tiempo_hitstun = 0.0
 
     def puede_golpear(self) -> bool:
         return self.tiempo_golpe <= 0.0 and self.esta_vivo()
 
-    def golpear(self, otro):
-        if not self.puede_golpear():
-            return
-        otro.recibir_dano(self.ataque)
+    def golpear(self, otro) -> bool:
+        """Intenta golpear a otro jugador. Retorna True si conectó."""
+        if not self.puede_golpear(): return False
+        
         self.tiempo_golpe = self.cooldown_golpe
         self.estado = Jugador.ESTADO_ATAQUE_NORMAL
+        
+        d = otro.posicion - self.posicion
+        mirada = Vector(self.direccion_mirada, 0)
+        alcance = self.radio + otro.radio + 0.5
+        
+        if d.magnitud() <= alcance and d.producto_punto(mirada) > 0:
+            otro.recibir_dano(self.ataque)
+            return True
+        return False
 
     def puede_disparar(self) -> bool:
         return self.tiempo_disparo <= 0.0 and self.esta_vivo()
 
     def disparar(self):
-        # Cambia al estado de ataque a distancia.
-        # El proyectil lo crea main.py cuando el renderizador
-        # llega al frame correcto.
-        if not self.puede_disparar():
-            return
+        if not self.puede_disparar(): return
         self.estado = Jugador.ESTADO_ATAQUE_DISTANCIA
         self.tiempo_disparo = self.cooldown_disparo
         self.proyectil_disparado = False
 
     def crear_proyectil(self):
-        # Devuelve los datos para que main.py cree el Proyectil.
-        # Asi Jugador NO importa Proyectil (menos acoplamiento).
-        offset = 40 * self.direccion_mirada
-        origen = Vector(self.posicion.x + offset, self.posicion.y )
+        offset = 0.70 * self.direccion_mirada
+        origen = Vector(self.posicion.x + offset, self.posicion.y)
         direccion = Vector(self.direccion_mirada, 0)
         return origen, direccion
 
-    # ---------- Colision con otro jugador ----------
-
     def colisiona_con(self, otro) -> bool:
-        # Distancia entre posiciones <= suma de radios.
-        d = (self.posicion - otro.posicion).magnitud()
-        return d <= self.radio + otro.radio
+        return (self.posicion - otro.posicion).magnitud() <= self.radio + otro.radio
 
     def resolver_choque(self, otro):
-        # Separa a los dos usando las posiciones.
         diff = self.posicion - otro.posicion
         d = diff.magnitud()
-        if d < 1e-6:
-            return
+        if d < 1e-6: return
         overlap = (self.radio + otro.radio) - d
         direccion = diff.normalizar()
         self.posicion = self.posicion + direccion * (overlap / 2)
         otro.posicion = otro.posicion - direccion * (overlap / 2)
 
-    # ---------- Debug ----------
-
     def __repr__(self) -> str:
         return (f"Jugador(pos={self.posicion}, vel={self.velocidad}, "
                 f"estado={self.estado}, vida={self.vida:.0f}/"
-                f"{self.vida_max:.0f}, apoyado={self.apoyado})")
+                f"{self.vida_max:.0f}, apoyado={self.apoyado}, "
+                f"hitstun={self.tiempo_hitstun:.2f})")
