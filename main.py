@@ -263,7 +263,6 @@ def dibujar_hud(win, p1, p2, vidas_p1, vidas_p2, ganador, vida_vis_p1, vida_vis_
     p2_texto_centrado = p2_x_barra + (ancho_barra - txt_vidas_p2.get_width()) // 2
     win.pantalla.blit(txt_vidas_p2, (p2_texto_centrado + desplazamiento, y_texto))
 
-    # ---------------- Pantalla de victoria (sin cambios) ----------------
     if ganador is not None and estado_juego == "ganador":
         s_vic = pygame.Surface((ANCHO, ALTO))
         s_vic.set_alpha(180); s_vic.fill(COLOR_25)
