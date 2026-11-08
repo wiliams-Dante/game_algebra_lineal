@@ -283,9 +283,8 @@ def dibujar_hud(win, p1, p2, vidas_p1, vidas_p2, ganador, vida_vis_p1, vida_vis_
         txt_sub = f_sub.render("Presiona R para jugar de nuevo | ESC para salir", True, COLOR_08)
         win.pantalla.blit(txt_sub, txt_sub.get_rect(center=(ANCHO // 2, ALTO // 2 + 50)))
 
-# ==================================================
-# JUEGO PRINCIPAL
-# ==================================================
+
+
 def main():
     global DEBUG_HITBOX
     win = G.Ventana("Álgebra Lineal en Videojuegos", ANCHO, ALTO, ANCHO, ESCALA, FPS)
