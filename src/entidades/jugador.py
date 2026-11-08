@@ -1,6 +1,6 @@
 # src/entidades/jugador.py
 from src.algebra.vector import Vector, EPSILON
-
+from src.algebra.base import Base2D
 class Jugador:
     ESTADO_QUIETO           = "quieto"
     ESTADO_MOVIMIENTO       = "movimiento"
@@ -108,13 +108,40 @@ class Jugador:
                 penetracion = self.radio
             else:
                 d = diff.normalizar()
+
+                # ─── FIX DEL BUG ───────────────────────────────
+                # Si el jugador está cayendo (velocidad apunta hacia
+                # la plataforma), lo empujamos en la dirección de la
+                # normal (hacia arriba) en lugar de seguir el diff
+                # (que apuntaría hacia abajo y lo mandaría al vacío).
+                n = plat.normal()
+                if self.velocidad.producto_punto(n) < 0:
+                    d = d + n
+                    if d.magnitud() > 1e-6:
+                        d = d.normalizar()
+                    else:
+                        d = n
+                # ─── FIN DEL FIX ──────────────────────────────
+
                 penetracion = self.radio - dist
 
             self.posicion = self.posicion + d * penetracion
-            vn = self.velocidad.producto_punto(d)
-            if vn < 0: self.velocidad = self.velocidad - d * vn
-            if d.y < -0.5: self.apoyado = True
 
+            # (el resto queda igual)
+            base_colision = Base2D(plat.direccion, d)
+            if base_colision.es_valida:
+                vel_local = base_colision.cambiar_de_base(self.velocidad)
+                if vel_local.y < 0:
+                    vel_local.y = 0
+                self.velocidad = base_colision.reconstruir_desde_base(vel_local.x, vel_local.y)
+            else:
+                vn = self.velocidad.producto_punto(d)
+                if vn < 0:
+                    self.velocidad = self.velocidad - d * vn
+
+            if d.y < -0.5:
+                self.apoyado = True  
+                   
     def _actualizar_estado(self):
         if not self.esta_vivo(): self.estado = Jugador.ESTADO_MUERE
         elif not self.apoyado:

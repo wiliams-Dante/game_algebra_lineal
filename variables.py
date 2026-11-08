@@ -6,9 +6,9 @@
 # ======================================================
 
 # --- Pantalla ---
-ANCHO_BASE = 1280
-ALTO_BASE  = 720
-ESCALA_GLOBAL = 1.2
+ANCHO_BASE = 1350
+ALTO_BASE  = 750
+ESCALA_GLOBAL = 1
 FPS = 60
 
 ANCHO = int(ANCHO_BASE * ESCALA_GLOBAL)

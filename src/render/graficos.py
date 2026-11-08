@@ -4,6 +4,7 @@ import sys
 import os
 import math
 from src.algebra.vector import Vector
+from src.algebra.base import Base2D  # <-- NUEVO: Importamos Base2D
 
 # Importamos configuración y paleta desde variables.py
 from variables import (
@@ -36,6 +37,10 @@ _origen = Vector(0, 0)
 _escala = 70.0
 _camara = Vector(0, 0)
 
+# --- NUEVO: Variables para el Zoom de la cámara ---
+_cam_angulo = 0.0
+_cam_zoom = 1.0
+
 def configurar(origen_pantalla, escala):
     global _origen, _escala
     _origen = origen_pantalla
@@ -45,10 +50,25 @@ def configurar_camara(pos_camara):
     global _camara
     _camara = pos_camara
 
+# --- NUEVO: Función para actualizar el zoom ---
+def configurar_camara_efectos(angulo, zoom):
+    global _cam_angulo, _cam_zoom
+    _cam_angulo = angulo
+    _cam_zoom = zoom
+
+# --- MODIFICADO: a_pantalla ahora usa Base2D ---
 def a_pantalla(p):
     p_relativo = p - _camara
-    return (int(_origen.x + p_relativo.x * _escala),
-            int(_origen.y - p_relativo.y * _escala))
+    
+    # Si hay rotación o zoom, aplicamos Cambio de Base
+    if _cam_angulo != 0.0 or _cam_zoom != 1.0:
+        c, s = math.cos(_cam_angulo), math.sin(_cam_angulo)
+        # Creamos la base de la cámara usando tu clase de Álgebra Lineal
+        base_cam = Base2D(Vector(c, s), Vector(-s, c))
+        p_relativo = base_cam.cambiar_de_base(p_relativo)
+        
+    return (int(_origen.x + p_relativo.x * _escala * _cam_zoom),
+            int(_origen.y - p_relativo.y * _escala * _cam_zoom))
 
 def clamp(v, minimo, maximo):
     return max(minimo, min(maximo, v))
@@ -132,9 +152,17 @@ class Ventana:
         configurar_camara(Vector(0, 0))
 
     def salir(self):
+        try:
+            pygame.mixer.music.stop()
+        except Exception:
+            pass
+        try:
+            pygame.mixer.quit()
+        except Exception:
+            pass
         pygame.quit()
         sys.exit()
-
+        
     def empezar_frame(self):
         dt = self.reloj.tick(self.fps) / 1000.0
         teclas = pygame.key.get_pressed()

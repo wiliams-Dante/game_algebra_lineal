@@ -1,4 +1,5 @@
 # launcher.py
+
 import pygame
 import sys
 import subprocess
@@ -91,6 +92,7 @@ def dibujar_menu(pantalla, tiempo, seleccion, opciones, particulas, capas_fondo)
 
 def main():
     pygame.init()
+    pygame.mixer.quit()   # el launcher no usa audio
     pantalla = pygame.display.set_mode((ANCHO, ALTO))
     pygame.display.set_caption("Presentación - Álgebra Lineal")
     reloj = pygame.time.Clock()
@@ -129,29 +131,50 @@ def main():
                         seleccion = (seleccion + 1) % len(opciones)
                     elif e.key == pygame.K_UP:
                         seleccion = (seleccion - 1) % len(opciones)
+
                     elif e.key == pygame.K_RETURN:
 
                         if seleccion == 4:
                             pygame.quit(); sys.exit()
 
-                        pygame.display.quit()
-                        pygame.quit()
-
                         cmd = []
-                        if seleccion == 0: cmd = [sys.executable, "main.py"]
+                        if seleccion == 0:   cmd = [sys.executable, "main.py"]
                         elif seleccion == 1: cmd = [sys.executable, "-m", "demos.demo_1"]
                         elif seleccion == 2: cmd = [sys.executable, "-m", "demos.demo_2"]
                         elif seleccion == 3: cmd = [sys.executable, "-m", "demos.demo_3"]
 
                         if cmd:
-                            subprocess.run(cmd)
+                            pygame.event.clear()
 
-                        pygame.init()
-                        pantalla = pygame.display.set_mode((ANCHO, ALTO))
-                        pygame.display.set_caption("Presentación - Álgebra Lineal")
-                        pygame.event.clear()
-                        capas_fondo = F.cargar_capas_fondo(ANCHO, ALTO)
-                        particulas = F.crear_particulas(ANCHO, ALTO, cantidad=40)
+                            # Minimizar el launcher para que no tape al hijo
+                            try:
+                                pygame.display.iconify()
+                            except Exception:
+                                pass
+
+                            # Lanzar el hijo SIN bloquear
+                            proc = subprocess.Popen(cmd)
+
+                            # Esperar al hijo, pero bombeando eventos
+                            # (esto evita "launcher no responde")
+                            while proc.poll() is None:
+                                reloj.tick(30)                 # ~33 ms, no quema CPU
+                                for ev in pygame.event.get():
+                                    if ev.type == pygame.QUIT:
+                                        proc.terminate()
+                                        proc.wait()
+                                        pygame.quit()
+                                        sys.exit()
+
+                            pygame.event.clear()
+
+                            # Restaurar la ventana del launcher
+                            try:
+                                pantalla = pygame.display.set_mode((ANCHO, ALTO))
+                                pygame.display.set_caption("Presentación - Álgebra Lineal")
+                            except Exception:
+                                pass
+
                         estado = "menu"
                         tiempo = 0
 
